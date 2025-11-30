@@ -1,0 +1,12 @@
+.{
+    .name = .libqt6c_demo,
+    .version = "6.8.2",
+    .dependencies = .{
+        .libqt6c = .{
+            .url = "https://github.com/rcalixte/libqt6c/archive/cfcca628d110634ae8e2b9add3317d7e87efd497.tar.gz",
+            .hash = "libqt6c-6.8.2-DLhhNtiWGBF8FH_UBjvPivOk0ZUxIq4thAwlOJbl_NZj",
+        },
+    },
+    .paths = .{""},
+    .fingerprint = 0x6f5266d0979c2e40,
+}
