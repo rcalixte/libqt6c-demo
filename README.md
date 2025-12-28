@@ -61,7 +61,7 @@ sudo pkg install qt6-base
 #### Debian-based distributions
 
 ```bash
-sudo apt install qt6-base-dev
+sudo apt install gcc libstdc++-14-dev-$(dpkg --print-architecture)-cross qt6-base-dev
 ```
 
 > [!NOTE]
@@ -70,7 +70,7 @@ sudo apt install qt6-base-dev
 #### Fedora-based distributions
 
 ```bash
-sudo dnf install qt6-qtbase-devel
+sudo dnf install sysroot-$(uname -m)-fc$(lsb_release -rs)-glibc gcc libstdc++-devel qt6-qtbase-devel
 ```
 
 > [!NOTE]
@@ -79,7 +79,13 @@ sudo dnf install qt6-qtbase-devel
 #### Arch-based distributions
 
 ```bash
-sudo pacman -S qt6-base
+sudo pacman -S gcc qt6-base
+```
+
+Users of Arch-based distributions need to __make sure that all packages are up-to-date__ and then run the following commands:
+
+```bash
+sudo mkdir -v /usr/$(uname -m)-pc-linux-gnu && sudo cp -pr /usr/include /usr/$(uname -m)-pc-linux-gnu/
 ```
 
 > [!NOTE]
