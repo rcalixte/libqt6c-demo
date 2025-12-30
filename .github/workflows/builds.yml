@@ -79,7 +79,10 @@ jobs:
 
       - name: Linux build
         if: runner.os == 'Linux'
-        run: zig build --release=fast -Dextra-paths='${{ env.QT_ROOT_DIR }}'
+        run: |
+          sudo apt install -y --no-install-recommends libstdc++-14-dev-$(dpkg --print-architecture)-cross
+
+          zig build --release=fast -Dextra-paths='${{ env.QT_ROOT_DIR }}'
 
       - name: macOS build
         if: runner.os == 'macOS'
