@@ -2,26 +2,24 @@
 #include "resources.h"
 #include <stdbool.h>
 
+// Constants
 #define LINE_NUMBER_ROLE (QT_ITEMDATAROLE_USERROLE + 1)
 #define INITIAL_MAP_CAPACITY 32
 #define MAX_LINE_LENGTH 4096
 
-struct AppTab;
-struct AppWindow;
-typedef struct AppTab AppTab;
-typedef struct AppWindow AppWindow;
-
-struct AppTab {
+// Struct definitions
+typedef struct {
     QWidget* tab;
     QListWidget* outline;
     QTextEdit* textArea;
-};
+} AppTab;
 
-struct AppWindow {
+typedef struct {
     QMainWindow* w;
     QTabWidget* tabs;
-};
+} AppWindow;
 
+// Global definitions
 static AppWindow* main_window = NULL;
 
 static QMenu* file_menu = NULL;
@@ -38,6 +36,7 @@ static QAction* spanish_action = NULL;
 static QMenu* help_menu = NULL;
 static QAction* about_action = NULL;
 
+// Basic map data structure and methods
 static struct {
     void** keys;
     AppTab** values;
@@ -46,8 +45,8 @@ static struct {
 } app_tab_map = {0};
 
 static void map_init(size_t initial_capacity) {
-    app_tab_map.keys = (void**)calloc(initial_capacity, sizeof(void*));
-    app_tab_map.values = (AppTab**)calloc(initial_capacity, sizeof(AppTab*));
+    app_tab_map.keys = (void**)malloc(initial_capacity * sizeof(void*));
+    app_tab_map.values = (AppTab**)malloc(initial_capacity * sizeof(AppTab*));
     app_tab_map.capacity = initial_capacity;
     app_tab_map.size = 0;
 }
@@ -93,6 +92,7 @@ static void map_cleanup() {
     app_tab_map.capacity = 0;
 }
 
+// Callback for language-based menu actions
 void on_triggered(void* self) {
     const char* language = q_action_object_name(self);
     QLocale* locale = q_locale_new2(language);
@@ -175,6 +175,7 @@ void on_triggered(void* self) {
     libqt_free(language);
 }
 
+// AppTab methods
 static void handle_jump_to_bookmark(void* self, void* UNUSED current, void* UNUSED previous) {
     AppTab* tab = map_get(self);
     if (!tab)
@@ -287,6 +288,7 @@ static AppTab* new_app_tab() {
     return tab;
 }
 
+// AppWindow methods
 static void handle_tab_close(void* self, int index) {
     QWidget* widget = q_tabwidget_widget(self, index);
 
@@ -312,7 +314,7 @@ static void handle_tab_close(void* self, int index) {
     }
 }
 
-static void handle_close_current_tab() {
+static void handle_close_current_tab(UNUSED void* self) {
     if (main_window) {
         int current_index = q_tabwidget_current_index(main_window->tabs);
         if (current_index >= 0) {
@@ -336,11 +338,11 @@ static void create_tab_with_contents(AppWindow* window, const char* title, const
     q_tabwidget_set_current_index(window->tabs, idx);
 }
 
-static void handle_new_tab() {
+static void handle_new_tab(UNUSED void* self) {
     create_tab_with_contents(main_window, "New Document", "");
 }
 
-static void handle_file_open() {
+static void handle_file_open(UNUSED void* self) {
     const char* fname = q_filedialog_get_open_file_name4(main_window->w, "Open markdown file...", "", "Markdown files (*.md *.txt);;All Files (*)");
 
     FILE* file = fopen(fname, "r");
@@ -371,6 +373,14 @@ static void handle_file_open() {
 
     free(content);
     libqt_free(fname);
+}
+
+static void handle_exit(UNUSED void* self) {
+    q_application_quit();
+}
+
+static void handle_about(UNUSED void* self) {
+    q_application_about_qt();
 }
 
 static AppWindow* new_app_window() {
@@ -413,7 +423,7 @@ static AppWindow* new_app_window() {
     QIcon* exit_icon = q_icon_from_theme("application-exit");
     q_action_set_icon(exit_action, exit_icon);
     q_icon_delete(exit_icon);
-    q_action_on_triggered(exit_action, q_coreapplication_quit);
+    q_action_on_triggered(exit_action, handle_exit);
 
     options_menu = q_menubar_add_menu2(menubar, "&Options");
 
@@ -441,7 +451,7 @@ static AppWindow* new_app_window() {
     QKeySequence* about_shortcut = q_keysequence_new2("F1");
     q_action_set_shortcut(about_action, about_shortcut);
     q_keysequence_delete(about_shortcut);
-    q_action_on_triggered(about_action, q_application_about_qt);
+    q_action_on_triggered(about_action, handle_about);
 
     q_mainwindow_set_menu_bar(window->w, menubar);
 
@@ -477,6 +487,7 @@ static AppWindow* new_app_window() {
     return window;
 }
 
+// Main function
 int main(int argc, char* argv[]) {
     QApplication* qapp = q_application_new(&argc, argv);
 
