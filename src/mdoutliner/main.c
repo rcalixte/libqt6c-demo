@@ -176,7 +176,7 @@ void on_triggered(void* self) {
 }
 
 // AppTab methods
-static void handle_jump_to_bookmark(void* self, void* UNUSED current, void* UNUSED previous) {
+static void handle_jump_to_bookmark(void* self, void* current UNUSED, void* previous UNUSED) {
     AppTab* tab = map_get(self);
     if (!tab)
         return;
@@ -314,7 +314,7 @@ static void handle_tab_close(void* self, int index) {
     }
 }
 
-static void handle_close_current_tab(UNUSED void* self) {
+static void handle_close_current_tab(void* self UNUSED) {
     if (main_window) {
         int current_index = q_tabwidget_current_index(main_window->tabs);
         if (current_index >= 0) {
@@ -338,11 +338,11 @@ static void create_tab_with_contents(AppWindow* window, const char* title, const
     q_tabwidget_set_current_index(window->tabs, idx);
 }
 
-static void handle_new_tab(UNUSED void* self) {
+static void handle_new_tab(void* self UNUSED) {
     create_tab_with_contents(main_window, "New Document", "");
 }
 
-static void handle_file_open(UNUSED void* self) {
+static void handle_file_open(void* self UNUSED) {
     const char* fname = q_filedialog_get_open_file_name4(main_window->w, "Open markdown file...", "", "Markdown files (*.md *.txt);;All Files (*)");
 
     FILE* file = fopen(fname, "r");
@@ -375,11 +375,11 @@ static void handle_file_open(UNUSED void* self) {
     libqt_free(fname);
 }
 
-static void handle_exit(UNUSED void* self) {
+static void handle_exit(void* self UNUSED) {
     q_application_quit();
 }
 
-static void handle_about(UNUSED void* self) {
+static void handle_about(void* self UNUSED) {
     q_application_about_qt();
 }
 
