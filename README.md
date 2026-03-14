@@ -26,6 +26,7 @@ This demo application can be thought of as a simpler instructive template for us
     - [Debian-based distributions](#debian-based-distributions)
     - [Fedora-based distributions](#fedora-based-distributions)
     - [Arch-based distributions](#arch-based-distributions)
+    - [openSUSE-based distributions](#opensuse-based-distributions)
   - [macOS (native)](#macos-native)
   - [Windows (native)](#windows-native)
 - [Screenshots](#screenshots)
@@ -90,6 +91,21 @@ sudo mkdir -v /usr/$(uname -m)-pc-linux-gnu && sudo cp -pr /usr/include /usr/$(u
 
 > [!NOTE]
 > The `zig` package will need to be downloaded and installed separately if the latest stable version is not available in the default repositories.
+
+#### openSUSE-based distributions
+
+```bash
+sudo zypper install qt6-base-devel
+```
+
+Users of openSUSE-based distributions need to __make sure that all packages are up-to-date__ and then run the following commands:
+
+```bash
+sudo cp -pr /usr/include/* /usr/$(uname -m)-suse-linux/include/
+```
+
+> [!NOTE]
+> The `zig` package will need to be downloaded and installed separately as the version in the default repositories is too unstable for usage.
 
 ---
 
