@@ -29,6 +29,7 @@ static QAction* exit_action = NULL;
 
 static QMenu* options_menu = NULL;
 static QMenu* language_menu = NULL;
+
 static QAction* english_action = NULL;
 static QAction* french_action = NULL;
 static QAction* spanish_action = NULL;
@@ -64,23 +65,20 @@ static void map_put(void* key, AppTab* value) {
 }
 
 static AppTab* map_get(void* key) {
-    for (size_t i = 0; i < app_tab_map.size; i++) {
-        if (app_tab_map.keys[i] == key) {
+    for (size_t i = 0; i < app_tab_map.size; i++)
+        if (app_tab_map.keys[i] == key)
             return app_tab_map.values[i];
-        }
-    }
     return NULL;
 }
 
 static void map_remove(void* key) {
-    for (size_t i = 0; i < app_tab_map.size; i++) {
+    for (size_t i = 0; i < app_tab_map.size; i++)
         if (app_tab_map.keys[i] == key) {
             app_tab_map.keys[i] = app_tab_map.keys[app_tab_map.size - 1];
             app_tab_map.values[i] = app_tab_map.values[app_tab_map.size - 1];
             app_tab_map.size--;
             return;
         }
-    }
 }
 
 static void map_cleanup() {
@@ -95,7 +93,9 @@ static void map_cleanup() {
 // Callback for language-based menu actions
 void on_triggered(void* self) {
     const char* language = q_action_object_name(self);
+
     QLocale* locale = q_locale_new2(language);
+
     QTranslator* translator = q_translator_new();
 
     if (q_translator_load42(translator, locale, "mdoutliner", "_", ":/translations")) {
@@ -208,9 +208,8 @@ static void update_outline_for_content(AppTab* tab, const char* content) {
 
     while (*content) {
         size_t i = 0;
-        while (*content && *content != '\n' && i < MAX_LINE_LENGTH - 1) {
+        while (*content && *content != '\n' && i < MAX_LINE_LENGTH - 1)
             line[i++] = *content++;
-        }
         line[i] = '\0';
         if (*content == '\n')
             content++;
@@ -317,9 +316,8 @@ static void handle_tab_close(void* self, int index) {
 static void handle_close_current_tab(void* self UNUSED) {
     if (main_window) {
         int current_index = q_tabwidget_current_index(main_window->tabs);
-        if (current_index >= 0) {
+        if (current_index >= 0)
             handle_tab_close(main_window->tabs, current_index);
-        }
     }
 }
 
@@ -467,6 +465,18 @@ static AppWindow* new_app_window() {
     q_tabwidget_set_movable(window->tabs, true);
     q_tabwidget_on_tab_close_requested(window->tabs, handle_tab_close);
     q_mainwindow_set_central_widget(window->w, window->tabs);
+
+#ifdef DEMO_DEBUG_BUILD
+    QLabel* label = q_label_new3("## NOTE: This is a debug build.\n");
+    q_label_set_alignment(label, QT_ALIGNMENTFLAG_ALIGNCENTER);
+    q_label_set_text_format(label, QT_TEXTFORMAT_MARKDOWNTEXT);
+    q_label_set_style_sheet(label, "background-color: rgb(240, 228, 66); color: rgb(0, 0, 0);");
+
+    QStatusBar* status_bar = q_statusbar_new2();
+    q_statusbar_set_style_sheet(status_bar, "background-color: rgb(240, 228, 66);");
+    q_statusbar_add_permanent_widget2(status_bar, label, 1);
+    q_mainwindow_set_status_bar(window->w, status_bar);
+#endif
 
     const char* readme = "# Markdown Outliner"
                          "\n\nThis is sample markdown content and the outline is generated from it."
