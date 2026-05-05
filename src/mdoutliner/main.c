@@ -2,12 +2,10 @@
 #include "resources.h"
 #include <stdbool.h>
 
-// Constants
 #define LINE_NUMBER_ROLE (QT_ITEMDATAROLE_USERROLE + 1)
 #define INITIAL_MAP_CAPACITY 32
 #define MAX_LINE_LENGTH 4096
 
-// Struct definitions
 typedef struct {
     QWidget* tab;
     QListWidget* outline;
@@ -21,19 +19,15 @@ typedef struct {
 
 // Global definitions
 static AppWindow* main_window = NULL;
-
 static QMenu* file_menu = NULL;
 static QAction* new_action = NULL;
 static QAction* open_action = NULL;
 static QAction* exit_action = NULL;
-
 static QMenu* options_menu = NULL;
 static QMenu* language_menu = NULL;
-
 static QAction* english_action = NULL;
 static QAction* french_action = NULL;
 static QAction* spanish_action = NULL;
-
 static QMenu* help_menu = NULL;
 static QAction* about_action = NULL;
 
@@ -47,7 +41,15 @@ static struct {
 
 static void map_init(size_t initial_capacity) {
     app_tab_map.keys = (void**)malloc(initial_capacity * sizeof(void*));
+    if (!app_tab_map.keys) {
+        fprintf(stderr, "Failed to allocate memory for app_tab_map.keys\n");
+        abort();
+    }
     app_tab_map.values = (AppTab**)malloc(initial_capacity * sizeof(AppTab*));
+    if (!app_tab_map.values) {
+        fprintf(stderr, "Failed to allocate memory for app_tab_map.values\n");
+        abort();
+    }
     app_tab_map.capacity = initial_capacity;
     app_tab_map.size = 0;
 }
@@ -93,14 +95,12 @@ static void map_cleanup() {
 // Callback for language-based menu actions
 void on_triggered(void* self) {
     const char* language = q_action_object_name(self);
-
     QLocale* locale = q_locale_new2(language);
-
     QTranslator* translator = q_translator_new();
 
-    if (q_translator_load42(translator, locale, "mdoutliner", "_", ":/translations")) {
+    if (q_translator_load42(translator, locale, "mdoutliner", "_", ":/translations"))
         q_application_install_translator(translator);
-    } else {
+    else {
         fprintf(stderr, "Failed to load translation for %s\n", language);
         q_translator_delete(translator);
         q_locale_delete(locale);
@@ -186,14 +186,16 @@ static void handle_jump_to_bookmark(void* self, void* current UNUSED, void* prev
     QVariant* line_number_variant = q_listwidgetitem_data(item, LINE_NUMBER_ROLE);
     int line_number = q_variant_to_int(line_number_variant);
     q_variant_delete(line_number_variant);
-    QTextDocument* doc = q_textedit_document(tab->textArea);
 
+    QTextDocument* doc = q_textedit_document(tab->textArea);
     QTextBlock* block = q_textdocument_find_block_by_line_number(doc, line_number);
     QTextCursor* cursor = q_textcursor_new4(block);
 
     q_textcursor_set_position(cursor, q_textblock_position(block));
     q_textedit_set_text_cursor(tab->textArea, cursor);
     q_textedit_set_focus(tab->textArea);
+
+    q_textblock_delete(block);
     q_textcursor_delete(cursor);
 }
 
@@ -257,8 +259,10 @@ static void handle_text_changed(void* self) {
 
 static AppTab* new_app_tab() {
     AppTab* tab = (AppTab*)malloc(sizeof(AppTab));
-    if (!tab)
-        return NULL;
+    if (!tab) {
+        fprintf(stderr, "Failed to allocate memory for AppTab\n");
+        abort();
+    }
 
     tab->tab = q_widget_new2();
     QHBoxLayout* layout = q_hboxlayout_new(tab->tab);
@@ -290,6 +294,8 @@ static AppTab* new_app_tab() {
 // AppWindow methods
 static void handle_tab_close(void* self, int index) {
     QWidget* widget = q_tabwidget_widget(self, index);
+    if (!widget)
+        return;
 
     AppTab* tab_to_free = NULL;
 
@@ -324,8 +330,6 @@ static void handle_close_current_tab(void* self UNUSED) {
 static void create_tab_with_contents(AppWindow* window, const char* title, const char* content) {
     AppTab* tab = new_app_tab();
     // the new tab is cleaned up during handle_tab_close
-    if (!tab)
-        return;
 
     q_textedit_set_text(tab->textArea, content);
 
@@ -334,6 +338,7 @@ static void create_tab_with_contents(AppWindow* window, const char* title, const
     q_icon_delete(icon);
 
     q_tabwidget_set_current_index(window->tabs, idx);
+    map_put(tab->textArea, tab);
 }
 
 static void handle_new_tab(void* self UNUSED) {
@@ -341,7 +346,13 @@ static void handle_new_tab(void* self UNUSED) {
 }
 
 static void handle_file_open(void* self UNUSED) {
-    const char* fname = q_filedialog_get_open_file_name4(main_window->w, "Open markdown file...", "", "Markdown files (*.md *.txt);;All Files (*)");
+    const char* fname = q_filedialog_get_open_file_name4(
+        main_window->w,
+        "Open markdown file...",
+        "",
+        "Markdown files (*.md *.txt);;All Files (*)");
+    if (!fname)
+        return;
 
     FILE* file = fopen(fname, "r");
     if (!file) {
@@ -383,8 +394,10 @@ static void handle_about(void* self UNUSED) {
 
 static AppWindow* new_app_window() {
     AppWindow* window = (AppWindow*)malloc(sizeof(AppWindow));
-    if (!window)
-        return NULL;
+    if (!window) {
+        fprintf(stderr, "Failed to allocate memory for AppWindow\n");
+        abort();
+    }
 
     window->w = q_mainwindow_new2();
     q_mainwindow_set_window_title(window->w, "Markdown Outliner");
@@ -508,10 +521,6 @@ int main(int argc, char* argv[]) {
         printf("Resource initialization failed!\n");
 
     AppWindow* app = new_app_window();
-    if (!app) {
-        fprintf(stderr, "Failed to create application window\n");
-        return 1;
-    }
 
     q_mainwindow_show(app->w);
     int result = q_application_exec();
@@ -520,7 +529,10 @@ int main(int argc, char* argv[]) {
     if (!ok)
         printf("Resource deinitialization failed!\n");
 
+    for (size_t i = 0; i < app_tab_map.size; i++)
+        handle_tab_close(main_window->tabs, 0);
     map_cleanup();
+    q_mainwindow_delete(app->w);
     free(app);
 
     q_application_delete(qapp);
