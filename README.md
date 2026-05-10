@@ -83,11 +83,7 @@ sudo dnf install sysroot-$(uname -m)-fc$(lsb_release -rs)-glibc gcc libstdc++-de
 sudo pacman -S gcc qt6-base
 ```
 
-Users of Arch-based distributions need to __make sure that all packages are up-to-date__ and then run the following commands:
-
-```bash
-sudo mkdir -v /usr/$(uname -m)-pc-linux-gnu && sudo cp -pr /usr/include /usr/$(uname -m)-pc-linux-gnu/
-```
+Users of Arch-based distributions need to __make sure that all packages are up-to-date__.
 
 > [!NOTE]
 > The `zig` package will need to be downloaded and installed separately if the latest stable version is not available in the default repositories.
@@ -98,11 +94,7 @@ sudo mkdir -v /usr/$(uname -m)-pc-linux-gnu && sudo cp -pr /usr/include /usr/$(u
 sudo zypper install qt6-base-devel
 ```
 
-Users of openSUSE-based distributions need to __make sure that all packages are up-to-date__ and then run the following commands:
-
-```bash
-sudo cp -pr /usr/include/* /usr/$(uname -m)-suse-linux/include/
-```
+Users of openSUSE-based distributions need to __make sure that all packages are up-to-date__.
 
 > [!NOTE]
 > The `zig` package will need to be downloaded and installed separately as the version in the default repositories is too unstable for usage.
