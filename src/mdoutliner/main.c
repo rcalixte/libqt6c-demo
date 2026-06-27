@@ -297,25 +297,20 @@ static void handle_tab_close(void* self, int index) {
     if (!widget)
         return;
 
-    AppTab* tab_to_free = NULL;
+    q_tabwidget_remove_tab(self, index);
 
     for (size_t i = 0; i < app_tab_map.size; i++) {
         AppTab* tab = app_tab_map.values[i];
-        if (tab->tab == widget) {
-            tab_to_free = tab;
+        if (tab && tab->tab == widget) {
             if (tab->textArea)
                 map_remove(tab->textArea);
             if (tab->outline)
                 map_remove(tab->outline);
+            q_widget_delete(tab->tab);
+            free(tab);
+            app_tab_map.values[i] = NULL;
             break;
         }
-    }
-
-    q_tabwidget_remove_tab(self, index);
-
-    if (tab_to_free) {
-        q_widget_delete(tab_to_free->tab);
-        free(tab_to_free);
     }
 }
 
@@ -338,7 +333,6 @@ static void create_tab_with_contents(AppWindow* window, const char* title, const
     q_icon_delete(icon);
 
     q_tabwidget_set_current_index(window->tabs, idx);
-    map_put(tab->textArea, tab);
 }
 
 static void handle_new_tab(void* self UNUSED) {
