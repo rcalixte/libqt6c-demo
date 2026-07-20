@@ -62,7 +62,7 @@ sudo pkg install qt6-base
 #### Debian-based distributions
 
 ```bash
-sudo apt install gcc libstdc++-14-dev-$(dpkg --print-architecture)-cross qt6-base-dev
+sudo apt install gcc libstdc++-14-dev qt6-base-dev
 ```
 
 > [!NOTE]
@@ -71,7 +71,7 @@ sudo apt install gcc libstdc++-14-dev-$(dpkg --print-architecture)-cross qt6-bas
 #### Fedora-based distributions
 
 ```bash
-sudo dnf install sysroot-$(uname -m)-fc$(lsb_release -rs)-glibc gcc libstdc++-devel qt6-qtbase-devel
+sudo dnf install gcc libstdc++-devel qt6-qtbase-devel
 ```
 
 > [!NOTE]
@@ -176,21 +176,12 @@ Screenshots
 -----------
 
 <table align="center">
-
-|     ![cachy_kde](assets/cachy_kde.png)     |
-| :----------------------------------------: |
-|               CachyOS + KDE                |
-|    ![fedora_kde](assets/fedora_kde.png)    |
-|                Fedora + KDE                |
-|  ![freebsd_xfce](assets/freebsd_xfce.png)  |
-|               FreeBSD + Xfce               |
-| ![mint_cinnamon](assets/mint_cinnamon.png) |
-|           Linux Mint + Cinnamon            |
-|         ![macos](assets/macos.png)         |
-|                   macOS                    |
-|       ![windows](assets/windows.png)       |
-|                  Windows                   |
-
+  <tr style="border: 3px solid lightgray;"><td align="center"><img alt="CachyOS + KDE" src="assets/cachy_kde.png"><b>CachyOS + KDE</b></td></tr>
+  <tr style="border: 3px solid lightgray;"><td align="center"><img alt="Fedora + KDE" src="assets/fedora_kde.png"><b>Fedora + KDE</b></td></tr>
+  <tr style="border: 3px solid lightgray;"><td align="center"><img alt="FreeBSD + Xfce" src="assets/freebsd_xfce.png"><b>FreeBSD + Xfce</b></td></tr>
+  <tr style="border: 3px solid lightgray;"><td align="center"><img alt="Linux Mint + Cinnamon" src="assets/mint_cinnamon.png"><b>Linux Mint + Cinnamon</b></td></tr>
+  <tr style="border: 3px solid lightgray;"><td align="center"><img alt="macOS" src="assets/macos.png"><b>macOS</b></td></tr>
+  <tr style="border: 3px solid lightgray;"><td align="center"><img alt="Windows" src="assets/windows.png"><b>Windows</b></td></tr>
 </table>
 
 FAQ
