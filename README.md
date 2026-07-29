@@ -27,6 +27,7 @@ This demo application can be thought of as a simpler instructive template for us
     - [Fedora-based distributions](#fedora-based-distributions)
     - [Arch-based distributions](#arch-based-distributions)
     - [openSUSE-based distributions](#opensuse-based-distributions)
+    - [Flatpak](#flatpak)
   - [macOS (native)](#macos-native)
   - [Windows (native)](#windows-native)
 - [Screenshots](#screenshots)
@@ -98,6 +99,17 @@ Users of openSUSE-based distributions need to __make sure that all packages are 
 
 > [!NOTE]
 > The `zig` package will need to be downloaded and installed separately as the version in the default repositories is too unstable for usage.
+
+#### Flatpak
+
+These instructions assume that you have already installed and configured the Flatpak package manager with [Flathub](https://flathub.org/setup) and installed the `flatpak-builder` command-line tool.
+
+```bash
+flatpak-builder --user --install --force-clean --install-deps-from=flathub zig-out/flatpak-build io.github.rcalixte.libqt6c-demo.yml
+flatpak run --user --device=dri --filesystem=home --share=ipc --socket=session-bus --socket=fallback-x11 --socket=wayland io.github.rcalixte.libqt6c-demo
+```
+
+These commands do not require any of the additional steps described below.
 
 ---
 
