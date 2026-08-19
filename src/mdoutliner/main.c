@@ -18,7 +18,7 @@ typedef struct {
 } AppWindow;
 
 // Global definitions
-static AppWindow* app_window = NULL;
+static AppWindow app_window;
 static QMenu* file_menu = NULL;
 static QAction* new_action = NULL;
 static QAction* open_action = NULL;
@@ -257,13 +257,7 @@ static void handle_text_changed(void* self) {
     libqt_free(content);
 }
 
-static AppTab* new_app_tab() {
-    AppTab* tab = (AppTab*)malloc(sizeof(AppTab));
-    if (!tab) {
-        fprintf(stderr, "Failed to allocate memory for AppTab\n");
-        abort();
-    }
-
+void initialize_app_tab(AppTab* tab) {
     tab->tab = q_widget_new2();
     QHBoxLayout* layout = q_hboxlayout_new(tab->tab);
 
@@ -287,8 +281,6 @@ static AppTab* new_app_tab() {
         .data.ints = size_list,
     };
     q_splitter_set_sizes(panes, sizes);
-
-    return tab;
 }
 
 // AppWindow methods
@@ -314,33 +306,32 @@ static void handle_tab_close(void* self, int index) {
 }
 
 static void handle_close_current_tab(void* self UNUSED) {
-    if (app_window) {
-        int current_index = q_tabwidget_current_index(app_window->tabs);
-        if (current_index >= 0)
-            handle_tab_close(app_window->tabs, current_index);
-    }
+    int current_index = q_tabwidget_current_index(app_window.tabs);
+    if (current_index >= 0)
+        handle_tab_close(app_window.tabs, current_index);
 }
 
-static void create_tab_with_contents(AppWindow* window, const char* title, const char* content) {
-    AppTab* tab = new_app_tab();
+static void create_tab_with_contents(const char* title, const char* content) {
+    AppTab tab;
+    initialize_app_tab(&tab);
     // the new tab is cleaned up during handle_tab_close
 
-    q_textedit_set_text(tab->text_area, content);
+    q_textedit_set_text(tab.text_area, content);
 
     QIcon* icon = q_icon_from_theme("text-markdown");
-    int idx = q_tabwidget_add_tab2(window->tabs, tab->tab, icon, title);
+    int idx = q_tabwidget_add_tab2(app_window.tabs, tab.tab, icon, title);
     q_icon_delete(icon);
 
-    q_tabwidget_set_current_index(window->tabs, idx);
+    q_tabwidget_set_current_index(app_window.tabs, idx);
 }
 
 static void handle_new_tab(void* self UNUSED) {
-    create_tab_with_contents(app_window, "New Document", "");
+    create_tab_with_contents("New Document", "");
 }
 
 static void handle_file_open(void* self UNUSED) {
     const char* fname = q_filedialog_get_open_file_name4(
-        app_window->w,
+        app_window.w,
         "Open markdown file...",
         "",
         "Markdown files (*.md *.txt);;All Files (*)");
@@ -371,7 +362,7 @@ static void handle_file_open(void* self UNUSED) {
     const char* basename = strrchr(fname, '/');
     basename = basename ? basename + 1 : fname;
 
-    create_tab_with_contents(app_window, basename, content);
+    create_tab_with_contents(basename, content);
 
     free(content);
     libqt_free(fname);
@@ -385,16 +376,10 @@ static void handle_about(void* self UNUSED) {
     q_application_about_qt();
 }
 
-static AppWindow* new_app_window() {
-    AppWindow* window = (AppWindow*)malloc(sizeof(AppWindow));
-    if (!window) {
-        fprintf(stderr, "Failed to allocate memory for AppWindow\n");
-        abort();
-    }
-
-    window->w = q_mainwindow_new2();
-    q_mainwindow_set_window_title(window->w, "Markdown Outliner");
-    q_mainwindow_resize(window->w, 900, 600);
+void initialize_app_window() {
+    app_window.w = q_mainwindow_new2();
+    q_mainwindow_set_window_title(app_window.w, "Markdown Outliner");
+    q_mainwindow_resize(app_window.w, 900, 600);
 
     QMenuBar* menubar = q_menubar_new2();
 
@@ -457,20 +442,20 @@ static AppWindow* new_app_window() {
     q_keysequence_delete(about_shortcut);
     q_action_on_triggered(about_action, handle_about);
 
-    q_mainwindow_set_menu_bar(window->w, menubar);
+    q_mainwindow_set_menu_bar(app_window.w, menubar);
 
     const char* close_key = "Ctrl+W";
     QKeySequence* close_shortcut = q_keysequence_new2(close_key);
-    QAction* close_action = q_mainwindow_add_action4(window->w, close_key, close_shortcut);
+    QAction* close_action = q_mainwindow_add_action4(app_window.w, close_key, close_shortcut);
     q_action_set_shortcut(close_action, close_shortcut);
     q_action_on_triggered(close_action, handle_close_current_tab);
     q_keysequence_delete(close_shortcut);
 
-    window->tabs = q_tabwidget_new(window->w);
-    q_tabwidget_set_tabs_closable(window->tabs, true);
-    q_tabwidget_set_movable(window->tabs, true);
-    q_tabwidget_on_tab_close_requested(window->tabs, handle_tab_close);
-    q_mainwindow_set_central_widget(window->w, window->tabs);
+    app_window.tabs = q_tabwidget_new(app_window.w);
+    q_tabwidget_set_tabs_closable(app_window.tabs, true);
+    q_tabwidget_set_movable(app_window.tabs, true);
+    q_tabwidget_on_tab_close_requested(app_window.tabs, handle_tab_close);
+    q_mainwindow_set_central_widget(app_window.w, app_window.tabs);
 
 #ifdef DEMO_DEBUG_BUILD
     QLabel* label = q_label_new3("## NOTE: This is a debug build.\n");
@@ -481,7 +466,7 @@ static AppWindow* new_app_window() {
     QStatusBar* status_bar = q_statusbar_new2();
     q_statusbar_set_style_sheet(status_bar, "background-color: rgb(240, 228, 66);");
     q_statusbar_add_permanent_widget2(status_bar, label, 1);
-    q_mainwindow_set_status_bar(window->w, status_bar);
+    q_mainwindow_set_status_bar(app_window.w, status_bar);
 #endif
 
     const char* readme = "# Markdown Outliner"
@@ -497,9 +482,7 @@ static AppWindow* new_app_window() {
                          "\n- Flip the splitter view between the text and the outline"
                          "\n- Change the language options menu to show an indicator for the current language";
 
-    create_tab_with_contents(window, "README.md", readme);
-
-    return window;
+    create_tab_with_contents("README.md", readme);
 }
 
 // Main function
@@ -512,9 +495,9 @@ int main(int argc, char* argv[]) {
     if (!ok)
         printf("Resource initialization failed!\n");
 
-    app_window = new_app_window();
+    initialize_app_window();
 
-    q_mainwindow_show(app_window->w);
+    q_mainwindow_show(app_window.w);
 
     int result = q_application_exec();
 
@@ -522,11 +505,10 @@ int main(int argc, char* argv[]) {
     if (!ok)
         printf("Resource deinitialization failed!\n");
 
-    while (q_tabwidget_count(app_window->tabs) > 0)
-        handle_tab_close(app_window->tabs, 0);
+    while (q_tabwidget_count(app_window.tabs) > 0)
+        handle_tab_close(app_window.tabs, 0);
     map_cleanup();
-    q_mainwindow_delete(app_window->w);
-    free(app_window);
+    q_mainwindow_delete(app_window.w);
 
     q_application_delete(qapp);
 
