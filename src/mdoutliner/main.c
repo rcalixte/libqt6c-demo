@@ -493,7 +493,7 @@ int main(int argc, char* argv[]) {
 
     bool ok = qrc_resource_rcc_resources_data_init();
     if (!ok)
-        printf("Resource initialization failed!\n");
+        fprintf(stderr, "Resource initialization failed!\n");
 
     initialize_app_window();
 
@@ -503,7 +503,7 @@ int main(int argc, char* argv[]) {
 
     ok = qrc_resource_rcc_resources_data_delete();
     if (!ok)
-        printf("Resource deinitialization failed!\n");
+        fprintf(stderr, "Resource deinitialization failed!\n");
 
     while (q_tabwidget_count(app_window.tabs) > 0)
         handle_tab_close(app_window.tabs, 0);
