@@ -51,5 +51,5 @@ modules:
           - zig-pkg
       - type: git
         url: https://github.com/rcalixte/libqt6c.git
-        commit: b4107dea19b10faccd4c3ee9fef8e6c8b6bad655
-        dest: zig-pkg/libqt6c-6.8.2-DLhhNvMh8BT1rzmN47vXjWbjqe5H15rR9WgKlfZIRSTa
+        commit: 10904ca68243bbee7bac27c21839e00df4f487cb
+        dest: zig-pkg/libqt6c-6.8.2-DLhhNl2h8RQkHurAXXScZovYLWJiF_CPpwZqpBZeSv_Z
