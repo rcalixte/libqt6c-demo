@@ -495,7 +495,7 @@ int main(int argc, char* argv[]) {
 
     map_init(INITIAL_MAP_CAPACITY);
 
-    bool ok = qrc_resource_rcc_resources_data_init();
+    bool ok = qrc_resources_init();
     if (!ok)
         fprintf(stderr, "Resource initialization failed!\n");
 
@@ -505,7 +505,7 @@ int main(int argc, char* argv[]) {
 
     int result = q_application_exec();
 
-    ok = qrc_resource_rcc_resources_data_delete();
+    ok = qrc_resources_delete();
     if (!ok)
         fprintf(stderr, "Resource deinitialization failed!\n");
 
@@ -513,7 +513,6 @@ int main(int argc, char* argv[]) {
         handle_tab_close(app_window.tabs, 0);
     map_cleanup();
     q_mainwindow_delete(app_window.w);
-
     q_application_delete(qapp);
 
     return result;
