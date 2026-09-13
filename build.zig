@@ -4,11 +4,13 @@ const host_os = @import("builtin").target.os.tag;
 const configureQtExeRootModule = @import("libqt6c").configureQtExeRootModule;
 
 var qt_dir: []const u8 = "";
+const win_root = "C:/Qt/6.8.3/llvm-mingw_64";
 
 pub fn build(b: *std.Build) !void {
     const optimize = b.standardOptimizeOption(.{});
     const target = b.standardTargetOptions(.{});
     const extra_paths = b.option([]const []const u8, "extra-paths", "Extra library header and include search paths") orelse &.{};
+    const maintainer = b.option(bool, "maintainer", "Enable maintainer mode") orelse false;
 
     const is_windows = target.result.os.tag == .windows or host_os == .windows;
 
@@ -24,6 +26,7 @@ pub fn build(b: *std.Build) !void {
         .target = target,
         .optimize = optimize,
         .@"extra-paths" = extra_paths,
+        .maintainer = maintainer,
     });
 
     const exe = b.addExecutable(.{
@@ -47,10 +50,15 @@ pub fn build(b: *std.Build) !void {
             exe.root_module.linkLibrary(qt6c.artifact(lib));
     }
 
+    const maintainer_flags: []const []const u8 = if (maintainer) &.{
+        "-Werror",
+        "-Wextra",
+    } else &.{};
+
     // Add main build source file
     exe.root_module.addCSourceFile(.{
         .file = b.path("src/mdoutliner/main.c"),
-        .flags = c_flags,
+        .flags = maintainer_flags,
     });
 
     // Create a check step
@@ -84,8 +92,6 @@ pub fn build(b: *std.Build) !void {
     // Install the executable
     b.installArtifact(exe);
 }
-
-const win_root = "C:/Qt/6.8.3/llvm-mingw_64";
 
 const qt_libraries = [_][]const u8{
     "qabstractitemview",
@@ -125,8 +131,4 @@ const qt_libraries = [_][]const u8{
 const debug_libraries = [_][]const u8{
     "qlabel",
     "qstatusbar",
-};
-
-const c_flags = &.{
-    "-O2",
 };
