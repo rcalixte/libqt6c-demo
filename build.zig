@@ -44,7 +44,7 @@ pub fn build(b: *std.Build) !void {
     for (qt_libraries) |lib|
         exe.root_module.linkLibrary(qt6c.artifact(lib));
 
-    if (optimize == .Debug) {
+    if (optimize == .debug) {
         exe.root_module.addCMacro("DEMO_DEBUG_BUILD", "");
         for (debug_libraries) |lib|
             exe.root_module.linkLibrary(qt6c.artifact(lib));
